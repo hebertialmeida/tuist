@@ -395,7 +395,7 @@ final class BuildPhaseGenerator: BuildPhaseGenerating {
             return
         }
 
-        guard let appClips = graphTraverser.appClipsDependency(path: path, name: target.name) else {
+        guard let appClips = graphTraverser.appClipDependencies(path: path, name: target.name) else {
             return
         }
 

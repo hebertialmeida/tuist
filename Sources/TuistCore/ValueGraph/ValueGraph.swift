@@ -94,10 +94,13 @@ public struct ValueGraph: Equatable {
             return .target(name: node.name, path: node.path)
         case let node as FrameworkNode:
             return .framework(path: node.path,
+                              binaryPath: node.binaryPath,
                               dsymPath: node.dsymPath,
                               bcsymbolmapPaths: node.bcsymbolmapPaths,
                               linking: node.linking,
-                              architectures: node.architectures)
+                              architectures: node.architectures,
+                              product: node.product,
+                              isCarthage: node.isCarthage)
         case let node as XCFrameworkNode:
             return .xcframework(path: node.path,
                                 infoPlist: node.infoPlist,

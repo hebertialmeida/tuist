@@ -3,7 +3,6 @@ import TSCBasic
 @testable import TuistCore
 
 final class MockGraphTraverser: GraphTraversing {
-
     var invokedNameGetter = false
     var invokedNameGetterCount = 0
     var stubbedName: String! = ""
@@ -152,35 +151,31 @@ final class MockGraphTraverser: GraphTraversing {
         return stubbedDirectStaticDependenciesResult
     }
 
-    var invokedAppClipsDependency = false
-    var invokedAppClipsDependencyCount = 0
-    var invokedAppClipsDependencyParameters: (path: AbsolutePath, name: String)?
-    var invokedAppClipsDependencyParametersList = [(path: AbsolutePath, name: String)]()
-    var stubbedAppClipsDependencyResult: ValueGraphTarget!
+    var invokedAppClipDependencies = false
+    var invokedAppClipDependenciesCount = 0
+    var invokedAppClipDependenciesParameters: (path: AbsolutePath, name: String)?
+    var invokedAppClipDependenciesParametersList = [(path: AbsolutePath, name: String)]()
+    var stubbedAppClipDependenciesResult: ValueGraphTarget!
 
-    func appClipsDependency(path: AbsolutePath, name: String) -> ValueGraphTarget? {
-        invokedAppClipsDependency = true
-        invokedAppClipsDependencyCount += 1
-        invokedAppClipsDependencyParameters = (path, name)
-        invokedAppClipsDependencyParametersList.append((path, name))
-        return stubbedAppClipsDependencyResult
+    func appClipDependencies(path: AbsolutePath, name: String) -> ValueGraphTarget? {
+        invokedAppClipDependencies = true
+        invokedAppClipDependenciesCount += 1
+        invokedAppClipDependenciesParameters = (path, name)
+        invokedAppClipDependenciesParametersList.append((path, name))
+        return stubbedAppClipDependenciesResult
     }
 
     var invokedEmbeddableFrameworks = false
     var invokedEmbeddableFrameworksCount = 0
     var invokedEmbeddableFrameworksParameters: (path: AbsolutePath, name: String)?
     var invokedEmbeddableFrameworksParametersList = [(path: AbsolutePath, name: String)]()
-    var stubbedEmbeddableFrameworksError: Error?
     var stubbedEmbeddableFrameworksResult: Set<GraphDependencyReference>! = []
 
-    func embeddableFrameworks(path: AbsolutePath, name: String) throws -> Set<GraphDependencyReference> {
+    func embeddableFrameworks(path: AbsolutePath, name: String) -> Set<GraphDependencyReference> {
         invokedEmbeddableFrameworks = true
         invokedEmbeddableFrameworksCount += 1
         invokedEmbeddableFrameworksParameters = (path, name)
         invokedEmbeddableFrameworksParametersList.append((path, name))
-        if let error = stubbedEmbeddableFrameworksError {
-            throw error
-        }
         return stubbedEmbeddableFrameworksResult
     }
 

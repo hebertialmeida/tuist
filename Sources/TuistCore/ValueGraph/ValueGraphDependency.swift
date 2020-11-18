@@ -13,10 +13,13 @@ public enum ValueGraphDependency: Hashable {
     /// A dependency that represents a pre-compiled framework.
     case framework(
         path: AbsolutePath,
+        binaryPath: AbsolutePath,
         dsymPath: AbsolutePath?,
         bcsymbolmapPaths: [AbsolutePath],
         linking: BinaryLinking,
-        architectures: [BinaryArchitecture]
+        architectures: [BinaryArchitecture],
+        product: Product,
+        isCarthage: Bool
     )
 
     /// A dependency that represents a pre-compiled library.
@@ -45,7 +48,7 @@ public enum ValueGraphDependency: Hashable {
         case let .xcframework(path, _, _, _):
             hasher.combine("xcframework")
             hasher.combine(path)
-        case let .framework(path, _, _, _, _):
+        case let .framework(path, _, _, _, _, _, _, _):
             hasher.combine("framework")
             hasher.combine(path)
         case let .library(path, _, _, _, _):

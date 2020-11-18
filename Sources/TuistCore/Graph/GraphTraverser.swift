@@ -2,13 +2,12 @@ import Foundation
 import TSCBasic
 
 public final class GraphTraverser: GraphTraversing {
-    
     private let graph: Graph
     public var name: String { graph.name }
     public var hasPackages: Bool { !graph.packages.isEmpty }
     public var path: AbsolutePath { graph.entryPath }
     public var workspace: Workspace { graph.workspace }
-    public var projects: [AbsolutePath: Project] { graph.projects.reduce(into: [AbsolutePath: Project](), {$0[$1.path] = $1}) }
+    public var projects: [AbsolutePath: Project] { graph.projects.reduce(into: [AbsolutePath: Project]()) { $0[$1.path] = $1 } }
 
     public init(graph: Graph) {
         self.graph = graph
@@ -54,36 +53,36 @@ public final class GraphTraverser: GraphTraversing {
         Set(graph.staticDependencies(path: path, name: name))
     }
 
-    public func appClipsDependency(path: AbsolutePath, name: String) -> ValueGraphTarget? {
-        graph.appClipsDependency(path: path, name: name).map { ValueGraphTarget(path: $0.path, target: $0.target, project: $0.project) }
+    public func appClipDependencies(path: AbsolutePath, name: String) -> ValueGraphTarget? {
+        graph.appClipDependencies(path: path, name: name).map { ValueGraphTarget(path: $0.path, target: $0.target, project: $0.project) }
     }
-    
-    public func embeddableFrameworks(path: AbsolutePath, name: String) throws -> Set<GraphDependencyReference> {
-        try Set(graph.embeddableFrameworks(path: path, name: name))
+
+    public func embeddableFrameworks(path: AbsolutePath, name: String) -> Set<GraphDependencyReference> {
+        Set(graph.embeddableFrameworks(path: path, name: name))
     }
-    
+
     public func linkableDependencies(path: AbsolutePath, name: String) throws -> Set<GraphDependencyReference> {
         try Set(graph.linkableDependencies(path: path, name: name))
     }
-    
+
     public func copyProductDependencies(path: AbsolutePath, name: String) -> Set<GraphDependencyReference> {
-        guard let target = self.graph.target(path: path, name: name) else { return Set() }
+        guard let target = graph.target(path: path, name: name) else { return Set() }
         return Set(graph.copyProductDependencies(path: path, target: target.target))
     }
-    
+
     public func librariesPublicHeadersFolders(path: AbsolutePath, name: String) -> Set<AbsolutePath> {
-        return Set(self.graph.librariesSearchPaths(path: path, name: name))
+        Set(graph.librariesSearchPaths(path: path, name: name))
     }
-    
+
     public func librariesSearchPaths(path: AbsolutePath, name: String) -> Set<AbsolutePath> {
-        return Set(self.graph.librariesSearchPaths(path: path, name: name))
+        Set(graph.librariesSearchPaths(path: path, name: name))
     }
-    
+
     public func librariesSwiftIncludePaths(path: AbsolutePath, name: String) -> Set<AbsolutePath> {
-        return Set(graph.librariesSwiftIncludePaths(path: path, name: name))
+        Set(graph.librariesSwiftIncludePaths(path: path, name: name))
     }
-    
+
     public func runPathSearchPaths(path: AbsolutePath, name: String) -> Set<AbsolutePath> {
-        return Set(graph.runPathSearchPaths(path: path, name: name))
+        Set(graph.runPathSearchPaths(path: path, name: name))
     }
 }

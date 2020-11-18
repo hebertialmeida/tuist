@@ -61,48 +61,45 @@ public protocol GraphTraversing {
     /// - Parameters:
     ///   - path: Path to the directory that contains the project.
     ///   - name: Target name.
-    func appClipsDependency(path: AbsolutePath, name: String) -> ValueGraphTarget?
-    
-    
+    func appClipDependencies(path: AbsolutePath, name: String) -> ValueGraphTarget?
+
     /// Given a project directory and a target name, it returns the list of dependencies that need to be embedded into the target product.
     /// - Parameters:
     ///   - path: Path to the directory that contains the project.
     ///   - name: Target name.
-    func embeddableFrameworks(path: AbsolutePath, name: String) throws -> Set<GraphDependencyReference>
-    
+    func embeddableFrameworks(path: AbsolutePath, name: String) -> Set<GraphDependencyReference>
+
     /// Given a project directory and a target name, it returns the list of dependencies that need to be linked from the target.
     /// - Parameters:
     ///   - path: Path to the directory that contains the project.
     ///   - name: Target name.
     func linkableDependencies(path: AbsolutePath, name: String) throws -> Set<GraphDependencyReference>
-    
-    
+
     /// Given a project directory and a target name, it returns a list of dependencies that need to be included in a copy files build phase
     ///
     /// - Parameters:
     ///   - path: Path to the directory that contains the project.
     ///   - name: Target name
     func copyProductDependencies(path: AbsolutePath, name: String) -> Set<GraphDependencyReference>
-    
-    
+
     /// Given a project directory and a target name, it returns the list of header folders that should be exposed to the target.
     /// - Parameters:
     ///   - path: Path to the directory that contains the project.
     ///   - name: Target name
     func librariesPublicHeadersFolders(path: AbsolutePath, name: String) -> Set<AbsolutePath>
-    
+
     /// Given a project directory and a target name, it returns the list of library folders that should be exposed to the target.
     /// - Parameters:
     ///   - path: Path to the directory that contains the project.
     ///   - name: Target name.
     func librariesSearchPaths(path: AbsolutePath, name: String) -> Set<AbsolutePath>
-    
+
     /// Given a project directory and a target name, it returns the list of foldres with Swift modules that should be expoed to the target.
     /// - Parameters:
     ///   - path: Path to the directory that contains the project.
     ///   - name: Target name.
     func librariesSwiftIncludePaths(path: AbsolutePath, name: String) -> Set<AbsolutePath>
-    
+
     /// Returns all runpath search paths of the given target
     /// Currently applied only to test targets with no host application
     /// - Parameters:

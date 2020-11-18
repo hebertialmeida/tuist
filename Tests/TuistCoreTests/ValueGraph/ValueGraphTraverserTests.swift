@@ -1,9 +1,9 @@
 import Foundation
 import TSCBasic
-import TuistCore
 import TuistSupport
 import XCTest
 
+@testable import TuistCore
 @testable import TuistCoreTesting
 @testable import TuistSupportTesting
 
@@ -460,7 +460,7 @@ final class ValueGraphTraverserTests: TuistUnitTestCase {
                                                              frameworkB.name: frameworkB]],
                                     dependencies: dependencies)
         let subject = ValueGraphTraverser(graph: graph)
-        
+
         // When
         let got = subject.filterDependencies(from: .target(name: app.name, path: project.path),
                                              test: { _ in true },
@@ -550,4 +550,30 @@ final class ValueGraphTraverserTests: TuistUnitTestCase {
             "MessageExtension",
         ])
     }
+
+    func test_appClipDependencies() throws {
+        XCTFail()
+    }
+
+    func test_embeddableFrameworks() throws {
+        XCTFail()
+    }
+
+    func test_linkableDependencies() throws {
+        XCTFail()
+    }
+
+    func test_copyProductDependencies() throws {
+        XCTFail()
+    }
+
+    func test_librariesPublicHeadersFolders() throws {
+        XCTFail()
+    }
+
+    func test_librariesSearchPaths() throws {}
+
+    func test_librariesSwiftIncludePaths() throws {}
+
+    func test_runPathSearchPaths() throws {}
 }
