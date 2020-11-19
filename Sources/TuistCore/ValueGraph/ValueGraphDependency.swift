@@ -73,4 +73,28 @@ public enum ValueGraphDependency: Hashable {
             hasher.combine(path)
         }
     }
+
+    public var isTarget: Bool {
+        switch self {
+        case .xcframework: return false
+        case .framework: return false
+        case .library: return false
+        case .packageProduct: return false
+        case .target: return true
+        case .sdk: return false
+        case .cocoapods: return false
+        }
+    }
+
+    public var isPrecompiled: Bool {
+        switch self {
+        case .xcframework: return true
+        case .framework: return true
+        case .library: return true
+        case .packageProduct: return false
+        case .target: return false
+        case .sdk: return false
+        case .cocoapods: return false
+        }
+    }
 }

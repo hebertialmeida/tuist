@@ -325,7 +325,9 @@ final class BuildPhaseGenerator: BuildPhaseGenerating {
                                         pbxproj: PBXProj,
                                         resourcesBuildPhase: PBXResourcesBuildPhase)
     {
-        let bundles = graphTraverser.resourceBundleDependencies(path: path, name: target.name)
+        let bundles = graphTraverser
+            .resourceBundleDependencies(path: path, name: target.name)
+            .sorted()
         let refs = bundles.compactMap { fileElements.product(target: $0.target.name) }
 
         refs.forEach {
@@ -342,7 +344,7 @@ final class BuildPhaseGenerator: BuildPhaseGenerating {
                                          fileElements: ProjectFileElements,
                                          pbxproj: PBXProj) throws
     {
-        let appExtensions = graphTraverser.appExtensionDependencies(path: path, name: target.name)
+        let appExtensions = graphTraverser.appExtensionDependencies(path: path, name: target.name).sorted()
         guard !appExtensions.isEmpty else { return }
 
         let appExtensionsBuildPhase = PBXCopyFilesBuildPhase(dstSubfolderSpec: .plugins, name: "Embed App Extensions")

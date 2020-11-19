@@ -149,78 +149,78 @@ public class ValueGraphTraverser: GraphTraversing {
         return references
     }
 
-    public func linkableDependencies(path _: AbsolutePath, name _: String) throws -> Set<GraphDependencyReference> {
-        Set()
-//        guard let targetNode = findTargetNode(path: path, name: name) else {
-//            return []
-//        }
-//
-//        var references = Set<GraphDependencyReference>()
-//
-//        // System libraries and frameworks
-//
-//        if targetNode.target.canLinkStaticProducts() {
-//            let transitiveSystemLibraries = transitiveStaticTargetNodes(for: targetNode).flatMap {
-//                $0.sdkDependencies.map {
-//                    GraphDependencyReference.sdk(path: $0.path, status: $0.status, source: $0.source)
-//                }
-//            }
-//
-//            references = references.union(transitiveSystemLibraries)
-//        }
-//
-//        if targetNode.target.isAppClip {
-//            let path = try SDKNode.appClip(status: .required).path
-//            references.insert(GraphDependencyReference.sdk(path: path,
-//                                                           status: .required,
-//                                                           source: .system))
-//        }
-//
-//        let directSystemLibrariesAndFrameworks = targetNode.sdkDependencies.map {
-//            GraphDependencyReference.sdk(path: $0.path, status: $0.status, source: $0.source)
-//        }
-//
-//        references = references.union(directSystemLibrariesAndFrameworks)
-//
-//        // Precompiled libraries and frameworks
-//
-//        let precompiledLibrariesAndFrameworks = targetNode.precompiledDependencies
-//            .lazy
-//            .map(GraphDependencyReference.init)
-//
-//        references = references.union(precompiledLibrariesAndFrameworks)
-//
-//        // Static libraries and frameworks / Static libraries' dynamic libraries
-//
-//        if targetNode.target.canLinkStaticProducts() {
-//            var staticLibraryTargetNodes = transitiveStaticTargetNodes(for: targetNode)
-//
-//            // Exclude any static products linked in a host application
-//            if targetNode.target.product == .unitTests {
-//                if let hostApp = hostApplication(for: targetNode) {
-//                    staticLibraryTargetNodes.subtract(transitiveStaticTargetNodes(for: hostApp))
-//                }
-//            }
-//
-//            let staticLibraries = staticLibraryTargetNodes.map(productDependencyReference)
-//
-//            let staticDependenciesDynamicLibraries = staticLibraryTargetNodes.flatMap {
-//                $0.targetDependencies
-//                    .filter(or(isFramework, isDynamicLibrary))
-//                    .map(productDependencyReference)
-//            }
-//
-//            references = references.union(staticLibraries + staticDependenciesDynamicLibraries)
-//        }
-//
-//        // Link dynamic libraries and frameworks
-//
-//        let dynamicLibrariesAndFrameworks = targetNode.targetDependencies
-//            .filter(or(isFramework, isDynamicLibrary))
-//            .map(productDependencyReference)
-//
-//        references = references.union(dynamicLibrariesAndFrameworks)
-//        return Array(references).sorted()
+    public func linkableDependencies(path: AbsolutePath, name: String) throws -> Set<GraphDependencyReference> {
+        guard let target = self.target(path: path, name: name) else { return Set() }
+
+        var references = Set<GraphDependencyReference>()
+
+        // System libraries and frameworks
+        if target.target.canLinkStaticProducts() {
+            let transitiveSystemLibraries = transitiveStaticTargets(from: .target(name: name, path: path))
+                .flatMap { (dependency) -> [GraphDependencyReference] in
+                    let dependencies = self.graph.dependencies[dependency, default: []]
+                    return dependencies.compactMap { dependencyDependency -> GraphDependencyReference? in
+                        guard case let ValueGraphDependency.sdk(_, path, status, source) = dependencyDependency else { return nil }
+                        return .sdk(path: path, status: status, source: source)
+                    }
+                }
+            references.formUnion(transitiveSystemLibraries)
+        }
+
+        // AppClip dependencies
+        if target.target.isAppClip {
+            let path = try SDKNode.appClip(status: .required).path
+            references.formUnion([GraphDependencyReference.sdk(path: path,
+                                                               status: .required,
+                                                               source: .system)])
+        }
+
+        // Direct system libraries and frameworks
+        let directSystemLibrariesAndFrameworks = graph.dependencies[.target(name: name, path: path), default: []]
+            .compactMap { dependency -> GraphDependencyReference? in
+                guard case let ValueGraphDependency.sdk(_, path, status, source) = dependency else { return nil }
+                return .sdk(path: path, status: status, source: source)
+            }
+        references.formUnion(directSystemLibrariesAndFrameworks)
+
+        // Precompiled libraries and frameworks
+        let precompiledLibrariesAndFrameworks = graph.dependencies[.target(name: name, path: path), default: []]
+            .lazy
+            .filter(\.isPrecompiled)
+            .compactMap(dependencyReference)
+        references.formUnion(precompiledLibrariesAndFrameworks)
+
+        // Static libraries and frameworks / Static libraries' dynamic libraries
+        if target.target.canLinkStaticProducts() {
+            var transitiveStaticTargets = self.transitiveStaticTargets(from: .target(name: name, path: path))
+
+            // Exclude any static products linked in a host application
+            if target.target.product == .unitTests {
+                if let hostApp = hostApplication(path: path, name: name) {
+                    transitiveStaticTargets.subtract(self.transitiveStaticTargets(from: .target(name: hostApp.target.name, path: hostApp.project.path)))
+                }
+            }
+
+            let transitiveStaticTargetReferences = transitiveStaticTargets.compactMap(dependencyReference)
+
+            let staticDependenciesDynamicLibraries = transitiveStaticTargets.flatMap { (dependency) -> [GraphDependencyReference] in
+                self.graph.dependencies[dependency, default: []]
+                    .lazy
+                    .filter(\.isTarget)
+                    .filter(or(isDependencyFramework, isDependencyLibrary))
+                    .compactMap(dependencyReference)
+            }
+
+            references.formUnion(transitiveStaticTargetReferences + staticDependenciesDynamicLibraries)
+        }
+
+        // Link dynamic libraries and frameworks
+        let dynamicLibrariesAndFrameworks = graph.dependencies[.target(name: name, path: path), default: []]
+            .filter(or(isDependencyFramework, isDependencyDynamicLibrary))
+            .compactMap(dependencyReference)
+        references.formUnion(dynamicLibrariesAndFrameworks)
+
+        return references
     }
 
     public func copyProductDependencies(path: AbsolutePath, name: String) -> Set<GraphDependencyReference> {
@@ -345,8 +345,26 @@ public class ValueGraphTraverser: GraphTraversing {
         return references
     }
 
+    func transitiveStaticTargets(from dependency: ValueGraphDependency) -> Set<ValueGraphDependency> {
+        filterDependencies(from: dependency,
+                           test: isDependencyStaticTarget,
+                           skip: canDependencyLinkStaticProducts)
+    }
+
     func targetProductReference(target: ValueGraphTarget) -> GraphDependencyReference {
         .product(target: target.target.name, productName: target.target.productNameWithExtension)
+    }
+
+    func isDependencyLibrary(dependency: ValueGraphDependency) -> Bool {
+        switch dependency {
+        case .xcframework: return true
+        case .framework: return true
+        case .library: return true
+        case .packageProduct: return false
+        case .target: return false
+        case .sdk: return false
+        case .cocoapods: return false
+        }
     }
 
     func isDependencyFramework(dependency: ValueGraphDependency) -> Bool {
@@ -377,6 +395,24 @@ public class ValueGraphTraverser: GraphTraversing {
         guard case let ValueGraphDependency.target(name, path) = dependency,
             let target = self.target(path: path, name: name) else { return false }
         return canEmbedProducts(target: target.target)
+    }
+
+    func canDependencyLinkStaticProducts(dependency: ValueGraphDependency) -> Bool {
+        guard case let ValueGraphDependency.target(name, path) = dependency,
+            let target = self.target(path: path, name: name) else { return false }
+        return target.target.canLinkStaticProducts()
+    }
+
+    func isDependencyStaticTarget(dependency: ValueGraphDependency) -> Bool {
+        guard case let ValueGraphDependency.target(name, path) = dependency,
+            let target = self.target(path: path, name: name) else { return false }
+        return target.target.product.isStatic
+    }
+
+    func isDependencyDynamicLibrary(dependency: ValueGraphDependency) -> Bool {
+        guard case let ValueGraphDependency.target(name, path) = dependency,
+            let target = self.target(path: path, name: name) else { return false }
+        return target.target.product == .dynamicLibrary
     }
 
     func hostApplication(path: AbsolutePath, name: String) -> ValueGraphTarget? {
