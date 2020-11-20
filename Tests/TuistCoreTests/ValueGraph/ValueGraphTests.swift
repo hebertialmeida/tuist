@@ -113,7 +113,6 @@ final class ValueGraphTests: TuistUnitTestCase {
                                  bcsymbolmapPaths: bFrameworkNode.bcsymbolmapPaths,
                                  linking: bFrameworkNode.linking,
                                  architectures: bFrameworkNode.architectures,
-                                 product: bFrameworkNode.product,
                                  isCarthage: bFrameworkNode.isCarthage)), true)
         // Then: A -> Package
         XCTAssertEqual(valueGraph.dependencies[.target(name: aTarget.name, path: aNode.path)]?
@@ -125,7 +124,6 @@ final class ValueGraphTests: TuistUnitTestCase {
                                                           bcsymbolmapPaths: bFrameworkNode.bcsymbolmapPaths,
                                                           linking: bFrameworkNode.linking,
                                                           architectures: bFrameworkNode.architectures,
-                                                          product: bFrameworkNode.product,
                                                           isCarthage: bFrameworkNode.isCarthage), default: []]
             .contains(.framework(path: aFrameworkNode.path,
                                  binaryPath: aFrameworkNode.binaryPath,
@@ -133,7 +131,6 @@ final class ValueGraphTests: TuistUnitTestCase {
                                  bcsymbolmapPaths: aFrameworkNode.bcsymbolmapPaths,
                                  linking: aFrameworkNode.linking,
                                  architectures: aFrameworkNode.architectures,
-                                 product: aFrameworkNode.product,
                                  isCarthage: aFrameworkNode.isCarthage)), true)
         // then: AFramework
         XCTAssertNotNil(valueGraph.dependencies[.framework(path: aFrameworkNode.path,
@@ -142,7 +139,6 @@ final class ValueGraphTests: TuistUnitTestCase {
                                                            bcsymbolmapPaths: aFrameworkNode.bcsymbolmapPaths,
                                                            linking: aFrameworkNode.linking,
                                                            architectures: aFrameworkNode.architectures,
-                                                           product: aFrameworkNode.product,
                                                            isCarthage: aFrameworkNode.isCarthage)])
 
         // Then: XCTest

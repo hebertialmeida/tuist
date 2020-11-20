@@ -283,7 +283,7 @@ public class ValueGraphTraverser: GraphTraversing {
             .compactMap { (dependency: ValueGraphDependency) -> AbsolutePath? in
                 switch dependency {
                 case let .xcframework(path, _, _, _): return path
-                case let .framework(path, _, _, _, _, _, _, _): return path
+                case let .framework(path, _, _, _, _, _, _): return path
                 case .library: return nil
                 case .packageProduct: return nil
                 case .target: return nil
@@ -382,7 +382,7 @@ public class ValueGraphTraverser: GraphTraversing {
     func isDependencyDynamicAndLinkable(dependency: ValueGraphDependency) -> Bool {
         switch dependency {
         case let .xcframework(_, _, _, linking): return linking == .dynamic
-        case let .framework(_, _, _, _, linking, _, _, _): return linking == .dynamic
+        case let .framework(_, _, _, _, linking, _, _): return linking == .dynamic
         case .library: return false
         case .packageProduct: return false
         case .target: return false
@@ -434,7 +434,7 @@ public class ValueGraphTraverser: GraphTraversing {
         switch dependency {
         case .cocoapods:
             return nil
-        case let .framework(path, binaryPath, dsymPath, bcsymbolmapPaths, linking, architectures, product, isCarthage):
+        case let .framework(path, binaryPath, dsymPath, bcsymbolmapPaths, linking, architectures, isCarthage):
             return .framework(path: path,
                               binaryPath: binaryPath,
                               isCarthage: isCarthage,
@@ -442,7 +442,7 @@ public class ValueGraphTraverser: GraphTraversing {
                               bcsymbolmapPaths: bcsymbolmapPaths,
                               linking: linking,
                               architectures: architectures,
-                              product: product)
+                              product: (linking == .static) ? .staticFramework : .framework)
         case let .library(path, _, linking, architectures, _):
             return .library(path: path,
                             linking: linking,

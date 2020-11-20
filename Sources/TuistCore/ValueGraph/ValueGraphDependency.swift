@@ -18,7 +18,6 @@ public enum ValueGraphDependency: Hashable {
         bcsymbolmapPaths: [AbsolutePath],
         linking: BinaryLinking,
         architectures: [BinaryArchitecture],
-        product: Product,
         isCarthage: Bool
     )
 
@@ -48,7 +47,7 @@ public enum ValueGraphDependency: Hashable {
         case let .xcframework(path, _, _, _):
             hasher.combine("xcframework")
             hasher.combine(path)
-        case let .framework(path, _, _, _, _, _, _, _):
+        case let .framework(path, _, _, _, _, _, _):
             hasher.combine("framework")
             hasher.combine(path)
         case let .library(path, _, _, _, _):

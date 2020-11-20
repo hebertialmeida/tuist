@@ -99,7 +99,6 @@ public struct ValueGraph: Equatable {
                               bcsymbolmapPaths: node.bcsymbolmapPaths,
                               linking: node.linking,
                               architectures: node.architectures,
-                              product: node.product,
                               isCarthage: node.isCarthage)
         case let node as XCFrameworkNode:
             return .xcframework(path: node.path,

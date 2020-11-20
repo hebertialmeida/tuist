@@ -7,10 +7,11 @@ public final class GraphTraverser: GraphTraversing {
     public var hasPackages: Bool { !graph.packages.isEmpty }
     public var path: AbsolutePath { graph.entryPath }
     public var workspace: Workspace { graph.workspace }
-    public var projects: [AbsolutePath: Project] { graph.projects.reduce(into: [AbsolutePath: Project]()) { $0[$1.path] = $1 } }
+    public var projects: [AbsolutePath: Project]
 
     public init(graph: Graph) {
         self.graph = graph
+        projects = Dictionary(uniqueKeysWithValues: graph.projects.map { ($0.path, $0) })
     }
 
     public func target(path: AbsolutePath, name: String) -> ValueGraphTarget? {
